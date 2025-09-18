@@ -2,7 +2,7 @@
 node_modules/
 npm-debug.log
 yarn-error.log
-package-lock.json  # Oder yarn.lock, falls du Yarn nutzt (kommentiere aus, wenn du es tracken möchtest)
+# package-lock.json  # Kommentiert aus - wird für Production Builds benötigt
 
 # Environment Variables - NIEMALS in Git hochladen!
 .env
