@@ -11,12 +11,12 @@ RUN npm install --omit=dev
 # Source Code kopieren
 COPY . .
 
-# Port freigeben
-EXPOSE 3001
+# Port freigeben (Render nutzt standardmäßig Port 10000)
+EXPOSE 10000
 
-# Health Check hinzufügen
+# Health Check hinzufügen (angepasst für Render Port)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+  CMD curl -f http://localhost:${PORT:-10000}/health || exit 1
 
 # Anwendung starten
 CMD ["npm", "start"]

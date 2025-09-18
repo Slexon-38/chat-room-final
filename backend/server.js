@@ -9,13 +9,22 @@ const routes = require('./routes');
 const app = express();
 
 // CORS Middleware für alle Routen
+const allowedOrigins = [
+  'http://localhost:5173', // Lokale Entwicklung
+  process.env.FRONTEND_URL // Production Frontend URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: 'http://localhost:5173' // Erlaube Anfragen vom Frontend
+  origin: allowedOrigins,
+  credentials: true
 }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: 'http://localhost:5173' } // Spezifiziere auch hier die Origin
+  cors: { 
+    origin: allowedOrigins,
+    credentials: true
+  }
 });
 
 // API Routes
@@ -111,8 +120,8 @@ app.get('/health', (req, res) => {
 // Starte Server nach DB-Verbindung
 const startServer = async () => {
   await connectDB();
-  const PORT = process.env.PORT || 3001;
-  server.listen(PORT, () => console.log(`🚀 Server läuft auf Port ${PORT}`));
+  const PORT = process.env.PORT || 10000; // Render Standard-Port
+  server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server läuft auf Port ${PORT}`));
 };
 
 startServer();

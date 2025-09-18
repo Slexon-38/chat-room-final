@@ -10,8 +10,8 @@ const getSocketUrl = () => {
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:3001';
   }
-  // Für Produktion - verwende Environment Variable
-  return import.meta.env.VITE_SOCKET_URL || 'https://your-backend-service.onrender.com';
+  // Für Produktion - verwende Environment Variable oder Backend URL
+  return import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || window.location.origin;
 };
 
 const socket = io(getSocketUrl());
