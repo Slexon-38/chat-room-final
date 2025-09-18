@@ -178,9 +178,30 @@ const Message = sequelize.define('Message', {
   },
 });
 
+const ReadReceipt = sequelize.define('ReadReceipt', {
+  messageId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Message,
+      key: 'id'
+    }
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  readAt: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+});
+
 // Relationships
 User.hasMany(Message, { foreignKey: 'author', sourceKey: 'username' });
 Message.belongsTo(User, { foreignKey: 'author', targetKey: 'username' });
+Message.hasMany(ReadReceipt, { foreignKey: 'messageId' });
+ReadReceipt.belongsTo(Message, { foreignKey: 'messageId' });
 User.hasMany(Favorite, { foreignKey: 'username', sourceKey: 'username' });
 Favorite.belongsTo(User, { foreignKey: 'username', targetKey: 'username' });
 
@@ -204,4 +225,5 @@ module.exports = {
   User,
   Message,
   Favorite,
+  ReadReceipt,
 };

@@ -1,4 +1,4 @@
-const { Message } = require('./database');
+const { Message, ReadReceipt } = require('./database');
 
 // In-Memory-Speicher für Benutzer pro Raum und Tipp-Status
 const usersByRoom = {};
@@ -63,12 +63,18 @@ function initializeFeatures(io) {
         where: { room },
         order: [['createdAt', 'ASC']],
         limit: 50,
+        include: [{
+          model: ReadReceipt,
+          required: false
+        }]
       });
-      // Sende History mit Zeitstempeln
+      // Sende History mit Zeitstempeln und Read Receipts
       return history.map(m => ({ 
+        id: m.id,
         user: m.author, 
         text: m.content, 
-        timestamp: m.createdAt // Feature: Zeitstempel
+        timestamp: m.createdAt,
+        readBy: m.ReadReceipts ? m.ReadReceipts.map(r => r.username) : []
       }));
     };
 
@@ -80,14 +86,35 @@ function initializeFeatures(io) {
         room,
         author: author,
       };
-      await Message.create(messageData);
-      // Sende Nachricht mit Zeitstempel
+      const newMessage = await Message.create(messageData);
+      // Sende Nachricht mit Zeitstempel und ID
       return { 
+        id: newMessage.id,
         user: author, 
         text: sanitizedText, 
-        timestamp: new Date() // Feature: Zeitstempel
+        timestamp: new Date(),
+        readBy: []
       };
     };
+
+    // Read Receipt Handler
+    socket.on('mark-as-read', async ({ messageId, username }) => {
+      try {
+        await ReadReceipt.findOrCreate({
+          where: { messageId, username },
+          defaults: { messageId, username, readAt: new Date() }
+        });
+        
+        // Informiere andere User über Read Receipt
+        socket.to(socket.currentRoom).emit('message-read', { 
+          messageId, 
+          username,
+          readAt: new Date()
+        });
+      } catch (error) {
+        console.error('Error marking message as read:', error);
+      }
+    });
   };
 }
 
