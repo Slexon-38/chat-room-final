@@ -11,7 +11,8 @@ const app = express();
 // CORS Middleware für alle Routen
 const allowedOrigins = [
   'http://localhost:5173', // Lokale Entwicklung
-  process.env.FRONTEND_URL // Production Frontend URL
+  'https://chat-room-frontend-76f3.onrender.com', // Production Frontend URL
+  process.env.FRONTEND_URL // Falls zusätzliche URL gesetzt ist
 ].filter(Boolean);
 
 app.use(cors({
