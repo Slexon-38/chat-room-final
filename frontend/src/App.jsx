@@ -80,19 +80,21 @@ function App() {
 
   // Wenn in einem Raum, zeige Chat
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-200">
-      <div className="absolute top-4 right-4 flex gap-2">
-        <span className="bg-white px-3 py-2 rounded-md text-sm text-gray-700 font-medium">
+    <div className="h-screen bg-gray-200 relative">
+      <div className="absolute top-4 right-4 flex gap-2 z-50">
+        <span className="bg-white px-3 py-2 rounded-md text-sm text-gray-700 font-medium shadow-lg">
           Eingeloggt als: {user.username}
         </span>
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all"
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all shadow-lg"
         >
           Abmelden
         </button>
       </div>
-      <ChatRoom username={user.username} room={room} onLeave={handleLeave} />
+      <div className="flex justify-center items-center h-screen">
+        <ChatRoom username={user.username} room={room} onLeave={handleLeave} />
+      </div>
     </div>
   );
 }

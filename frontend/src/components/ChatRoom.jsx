@@ -150,17 +150,33 @@ function ChatRoom({ username, room, onLeave }) {
       if (endDate) params.append('endDate', endDate);
       
       const response = await fetch(`${backendUrl}/api/messages/search?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+      
       const searchResults = await response.json();
       
+      // Transformiere Backend-Daten zum Frontend-Format
+      const formattedResults = searchResults.map(msg => ({
+        id: msg.id,
+        user: msg.author,
+        text: msg.content,
+        timestamp: msg.createdAt,
+        readBy: msg.ReadReceipts ? msg.ReadReceipts.map(r => r.username) : []
+      }));
+      
       if (query || startDate || endDate) {
-        setSearchResults(searchResults);
+        setSearchResults(formattedResults);
         setIsSearchMode(true);
       } else {
-        setSearchResults(null);
+        setSearchResults([]);
         setIsSearchMode(false);
       }
     } catch (error) {
       console.error('Error searching messages:', error);
+      setSearchResults([]);
+      setIsSearchMode(false);
     }
   };
 
@@ -196,7 +212,7 @@ function ChatRoom({ username, room, onLeave }) {
     }
   };
 
-  const displayMessages = isSearchMode ? searchResults : messages;
+  const displayMessages = isSearchMode && searchResults ? searchResults : messages;
 
   const formatTimestamp = (isoString) => {
     if (!isoString) return '';
@@ -224,10 +240,19 @@ function ChatRoom({ username, room, onLeave }) {
             <span className="text-white font-semibold">ChatRoom: {room}</span>
             <button
               onClick={toggleFavorite}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-yellow-300 focus:outline-none transition-all"
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 focus:outline-none transition-all ${
+                favorites.has(room) 
+                  ? 'text-yellow-400 hover:text-yellow-300' 
+                  : 'text-white hover:text-yellow-300'
+              }`}
               aria-label="Als Favorit markieren"
             >
-              <svg className="w-6 h-6" fill={favorites.has(room) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className="w-6 h-6" 
+                fill={favorites.has(room) ? "currentColor" : "none"} 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
             </button>
@@ -244,7 +269,10 @@ function ChatRoom({ username, room, onLeave }) {
                 Suchergebnisse ({searchResults?.length || 0} Nachrichten)
               </span>
               <button
-                onClick={() => { setIsSearchMode(false); setSearchResults(null); }}
+                onClick={() => { 
+                  setIsSearchMode(false); 
+                  setSearchResults([]); 
+                }}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 Zurück zum Live-Chat

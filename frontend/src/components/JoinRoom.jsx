@@ -6,10 +6,33 @@ function JoinRoom({ onJoin, user }) {
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
-    // Lade Favoriten für den eingeloggten User
-    const userFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
-    setFavorites(userFavorites);
-  }, []);
+    // Lade Favoriten für den eingeloggten User vom Backend
+    const loadFavorites = async () => {
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://chat-room-backend-iov4.onrender.com';
+        const response = await fetch(`${backendUrl}/api/favorites/${username}`);
+        
+        if (response.ok) {
+          const userFavorites = await response.json();
+          setFavorites(userFavorites);
+          localStorage.setItem('userFavorites', JSON.stringify(userFavorites));
+        } else {
+          // Fallback zu localStorage
+          const savedFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
+          setFavorites(savedFavorites);
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        // Fallback zu localStorage
+        const savedFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
+        setFavorites(savedFavorites);
+      }
+    };
+
+    if (username) {
+      loadFavorites();
+    }
+  }, [username]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
