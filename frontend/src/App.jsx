@@ -81,10 +81,7 @@ function App() {
   // Wenn in einem Raum, zeige Chat
   return (
     <div className="h-screen bg-gray-200 relative">
-      <div className="absolute top-4 right-4 flex gap-2 z-50">
-        <span className="bg-white px-3 py-2 rounded-md text-sm text-gray-700 font-medium shadow-lg">
-          Eingeloggt als: {user.username}
-        </span>
+      <div className="absolute top-4 right-4 z-50">
         <button
           onClick={handleLogout}
           className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all shadow-lg"

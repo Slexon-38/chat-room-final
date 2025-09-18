@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import MessageInput from './MessageInput.jsx';
 import OnlineUsers from './OnlineUsers.jsx';
 import MessageSearch from './MessageSearch.jsx';
+import ReadReceiptIndicator from './ReadReceiptIndicator.jsx';
 import { showDesktopNotification, initializeNotifications } from '../utils/notificationManager.js';
 
 // Socket.IO-Verbindung - konfiguriert für lokale Entwicklung und Produktion
@@ -185,27 +186,39 @@ function ChatRoom({ username, room, onLeave }) {
     
     try {
       const isFavorite = favorites.has(room);
-      const endpoint = isFavorite ? '/api/favorites/remove' : '/api/favorites/add';
       
-      const response = await fetch(`${backendUrl}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, room }),
-      });
+      if (isFavorite) {
+        // Remove favorite
+        const response = await fetch(`${backendUrl}/api/favorites`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, room }),
+        });
 
-      if (response.ok) {
-        const newFavorites = new Set(favorites);
-        if (isFavorite) {
+        if (response.ok) {
+          const newFavorites = new Set(favorites);
           newFavorites.delete(room);
-        } else {
-          newFavorites.add(room);
+          setFavorites(newFavorites);
+          localStorage.setItem('userFavorites', JSON.stringify([...newFavorites]));
         }
-        setFavorites(newFavorites);
-        
-        // Update localStorage für JoinRoom Komponente
-        localStorage.setItem('userFavorites', JSON.stringify([...newFavorites]));
+      } else {
+        // Add favorite
+        const response = await fetch(`${backendUrl}/api/favorites`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, room }),
+        });
+
+        if (response.ok) {
+          const newFavorites = new Set(favorites);
+          newFavorites.add(room);
+          setFavorites(newFavorites);
+          localStorage.setItem('userFavorites', JSON.stringify([...newFavorites]));
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -294,14 +307,11 @@ function ChatRoom({ username, room, onLeave }) {
                   <span className="whitespace-pre-wrap break-words">{msg.text}</span>
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-xs text-gray-500">{formatTimestamp(msg.timestamp)}</span>
-                    {msg.user === username && msg.readBy && msg.readBy.length > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-blue-600">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span>✓ {msg.readBy.length}</span>
-                      </div>
-                    )}
+                    <ReadReceiptIndicator 
+                      message={msg}
+                      currentUsername={username}
+                      onlineUsers={onlineUsers}
+                    />
                   </div>
                 </div>
                 {msg.user === username && (
