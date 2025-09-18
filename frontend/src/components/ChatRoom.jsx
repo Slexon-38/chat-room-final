@@ -82,11 +82,28 @@ function ChatRoom({ username, room, onLeave }) {
     };
   }, [username, room, onLeave]);
 
-  // Load favorites from localStorage
+  // Load favorites from backend for the user
   useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem('chatFavorites') || '[]');
-    setFavorites(new Set(savedFavorites));
-  }, []);
+    const loadUserFavorites = async () => {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://chat-room-backend-iov4.onrender.com';
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/favorites/${username}`);
+        if (response.ok) {
+          const userFavorites = await response.json();
+          setFavorites(new Set(userFavorites));
+          localStorage.setItem('userFavorites', JSON.stringify(userFavorites));
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        // Fallback to localStorage
+        const savedFavorites = JSON.parse(localStorage.getItem('userFavorites') || '[]');
+        setFavorites(new Set(savedFavorites));
+      }
+    };
+
+    loadUserFavorites();
+  }, [username]);
 
   // Mark messages as read when they come into view
   useEffect(() => {
@@ -147,15 +164,36 @@ function ChatRoom({ username, room, onLeave }) {
     }
   };
 
-  const toggleFavorite = () => {
-    const newFavorites = new Set(favorites);
-    if (favorites.has(room)) {
-      newFavorites.delete(room);
-    } else {
-      newFavorites.add(room);
+  const toggleFavorite = async () => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://chat-room-backend-iov4.onrender.com';
+    
+    try {
+      const isFavorite = favorites.has(room);
+      const endpoint = isFavorite ? '/api/favorites/remove' : '/api/favorites/add';
+      
+      const response = await fetch(`${backendUrl}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, room }),
+      });
+
+      if (response.ok) {
+        const newFavorites = new Set(favorites);
+        if (isFavorite) {
+          newFavorites.delete(room);
+        } else {
+          newFavorites.add(room);
+        }
+        setFavorites(newFavorites);
+        
+        // Update localStorage für JoinRoom Komponente
+        localStorage.setItem('userFavorites', JSON.stringify([...newFavorites]));
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     }
-    setFavorites(newFavorites);
-    localStorage.setItem('chatFavorites', JSON.stringify([...newFavorites]));
   };
 
   const displayMessages = isSearchMode ? searchResults : messages;
