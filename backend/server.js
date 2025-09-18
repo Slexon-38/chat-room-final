@@ -1,18 +1,18 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors'); // Importiere cors
+const cors = require('cors');
 const { connectDB, User } = require('./database');
 const { initializeFeatures } = require('./features');
 const routes = require('./routes');
 
 const app = express();
 
-// CORS Middleware für alle Routen
+// CORS Konfiguration für alle Routen
 const allowedOrigins = [
   'http://localhost:5173', // Lokale Entwicklung
   'https://chat-room-frontend-76f3.onrender.com', // Production Frontend URL
-  process.env.FRONTEND_URL // Falls zusätzliche URL gesetzt ist
+  process.env.FRONTEND_URL // Zusätzliche URL aus Environment
 ].filter(Boolean);
 
 app.use(cors({

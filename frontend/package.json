@@ -1,7 +1,8 @@
 {
-  "name": "frontend",
+  "name": "chat-room-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Real-time chat room frontend with React and Socket.io",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "keywords": ["chat", "react", "socket.io", "realtime", "vite"],
+  "author": "Slexon",
+  "license": "MIT",
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

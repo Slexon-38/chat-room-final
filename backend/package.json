@@ -1,14 +1,15 @@
 {
-  "name": "backend",
+  "name": "chat-room-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Real-time chat room backend with Socket.io and PostgreSQL",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["chat", "socket.io", "realtime", "nodejs"],
+  "author": "Slexon",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

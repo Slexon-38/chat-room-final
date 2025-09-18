@@ -8,13 +8,13 @@ function App() {
   const [inRoom, setInRoom] = useState(false);
   const [room, setRoom] = useState('');
 
-  // Check für gespeicherte Login-Session
+  // Session-Management: Prüfe gespeicherte Login-Session
   useEffect(() => {
     const savedUser = localStorage.getItem('chatUser');
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
-        // Prüfe ob Session noch gültig ist (z.B. nicht älter als 7 Tage)
+        // Prüfe ob Session noch gültig ist (max. 7 Tage)
         const loginTime = new Date(userData.loginTime);
         const now = new Date();
         const daysDiff = (now - loginTime) / (1000 * 60 * 60 * 24);
@@ -22,7 +22,7 @@ function App() {
         if (daysDiff < 7) {
           setUser(userData);
         } else {
-          // Session abgelaufen
+          // Session abgelaufen - cleanup
           localStorage.removeItem('chatUser');
           localStorage.removeItem('userFavorites');
         }
