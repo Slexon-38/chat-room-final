@@ -10,8 +10,8 @@ const getSocketUrl = () => {
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:3001';
   }
-  // Für Produktion - verwende Environment Variable oder Backend URL
-  return import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || window.location.origin;
+  // Für Produktion - verwende Backend URL
+  return import.meta.env.VITE_BACKEND_URL || 'https://chat-room-backend-iov4.onrender.com';
 };
 
 const socket = io(getSocketUrl());
