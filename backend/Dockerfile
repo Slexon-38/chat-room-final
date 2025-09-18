@@ -5,11 +5,11 @@ FROM node:23-alpine
 WORKDIR /app
 
 # Package.json kopieren und Dependencies installieren
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install --omit=dev
 
 # Source Code kopieren
-COPY . .
+COPY backend/ .
 
 # Port freigeben (Render nutzt standardmäßig Port 10000)
 EXPOSE 10000
